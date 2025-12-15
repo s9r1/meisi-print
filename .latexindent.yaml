@@ -1,0 +1,5 @@
+indentPreamble: 1
+
+noAdditionalIndentGlobal:
+  keyEqualsValuesBracesBrackets: 1
+  namedGroupingBracesBrackets: 1

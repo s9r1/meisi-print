@@ -1,0 +1,81 @@
+\documentclass{jlreq}
+\usepackage{tikz}
+\pagestyle{empty}
+
+% --- 設定はここから
+
+\newcommand{\card}{%
+  \includegraphics[width=91mm,height=55mm]{card-sample.pdf}%
+  % 縦型名刺なら以下のように指定
+  % \includegraphics[width=55mm,height=91mm,angle=-90,page=2]{card-sample.pdf}%
+}
+
+% --
+% カード間にマージンがある用紙の場合、アンコメントして長さを入力
+\newlength{\hmargin}
+% \setlength{\hmargin}{4mm}% 水平方向のマージン
+\newlength{\vmargin}
+% \setlength{\vmargin}{2mm}% 垂直方向のマージン
+
+% --
+% プリンタによっては印刷結果に応じた位置の微調整が必要
+\newlength{\offsetY}
+% \setlength{\offsetY}{0.9mm}
+\newlength{\offsetX}
+% \setlength{\offsetX}{0.9mm}
+
+% --
+% 塗り足し
+\newbool{bleed}
+% \booltrue{bleed}% 塗り足す場合はここをアンコメントする
+
+% --- 設定はここまで
+
+% 1枚のカードの八方に同一カードを描画することで塗り足す
+% 塗り足しは0.1cmで計算している
+\pgfdeclarelayer{bg1}
+\pgfdeclarelayer{bg2}
+\pgfsetlayers{bg2,bg1,main}
+\newcommand{\drawbleed}[1]{%
+  \foreach \dx/\dy in {
+    -0.1/-0.1, -0.1/0.1, 0.1/-0.1, 0.1/0.1,% 四隅（左下左上右下右上）
+    -0.1/0, 0.1/0, 0/-0.1, 0/0.1% 四辺（左右下上）
+  }{%
+    \begin{scope}[shift={(\dx,\dy)}]
+      % 4.45,2.65ではなく、あえて内側に0.05cm多く塗っている
+      \pgfmathsetmacro{\llx}{\dx <= 0 ? -4.55 : 4.4}
+      \pgfmathsetmacro{\urx}{\dx < 0 ? -4.4 : 4.55}
+      \pgfmathsetmacro{\lly}{\dy <= 0 ? -2.75 : 2.6}
+      \pgfmathsetmacro{\ury}{\dy < 0 ? -2.6 : 2.75}
+      \clip (\llx,\lly) rectangle (\urx,\ury);
+      %
+      % 四辺は中間レイヤーbg1に、四隅は最下位レイヤーbg2に描画して塗り足す
+      % カードの背景が透明でなければ、最上位のmainに描画するカードが塗り足しに侵食されることはない
+      \pgfmathparse{\dx*\dy == 0 ? 1 : 2} \edef\layerid{\pgfmathresult}
+      \begin{pgfonlayer}{bg\layerid}
+        \node at (0,0) {#1};
+      \end{pgfonlayer}
+    \end{scope}
+  }%
+}
+
+\begin{document}
+
+\begin{tikzpicture}[
+    remember picture,
+    overlay,
+    shift={([shift={(\offsetX,-\offsetY)}]current page.center)}
+  ]
+  \foreach \x in {-1,1} {
+    \begin{scope}[xshift={(45.5mm+\hmargin/2)*\x}]
+      \foreach \y in {-2,...,2} {
+        \begin{scope}[yshift={(55mm+\vmargin)*\y}]
+          \ifbool{bleed}{\drawbleed{\card}}{}
+          \node at (0,0) {\card};
+        \end{scope}
+      }
+    \end{scope}
+  }
+\end{tikzpicture}
+
+\end{document}

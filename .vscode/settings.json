@@ -1,0 +1,31 @@
+{
+  "latex-workshop.formatting.latex": "latexindent",
+  "latex-workshop.formatting.latexindent.args": [
+    "-c",
+    "%WORKSPACE_FOLDER%/.aux",
+    "%TMPFILE%",
+    "-y=defaultIndent: '%INDENT%'",
+    "-l",
+    "%WORKSPACE_FOLDER%/.latexindent.yaml"
+  ],
+
+  "latex-workshop.latex.recipe.default": "latexmk",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk",
+      "tools": ["latexmk"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": [
+        "-r",
+        "%WORKSPACE_FOLDER%/.latexmkrc",
+        "-auxdir=%WORKSPACE_FOLDER%/.aux",
+        "%DOC%"
+      ]
+    }
+  ]
+}
